@@ -17,7 +17,6 @@ app.use(express.json());
 
 // Schema and Model for MongoDB
 const product_Schema = new mongoose.Schema({
-    uid: String,
     display_name: String,
     product_name: String
 })
@@ -33,13 +32,6 @@ app.post('/api/data', (req, res) => {
         .then(() => res.status(201).send('Data saved to MongoDB'))
         .catch(err => res.status(400).send(`Error: ${err}`));
 });
-
-// Route สำหรับ GET request เพื่อดึงข้อมูลจาก MongoDB
-app.get('/api/data', (req, res) => {
-    Data.find()
-      .then((data) => res.status(200).json(data))
-      .catch((err) => res.status(400).json({ message: 'Error: ' + err }));
-  });
 
 // Start Server
 app.listen(port, () => {
