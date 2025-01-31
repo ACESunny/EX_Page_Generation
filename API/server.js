@@ -1,37 +1,37 @@
 const express = require('express');
-const mongoose = require('mongoose');
+// const mongoose = require('mongoose');
 const cors = require('cors');
+
 const app = express();
 const port = 7000;
 
 app.use(cors());
 
-// Connect to MongoDB
-const mongo_URI = 'mongodb+srv://admin:1234@cluster0.omwkm.mongodb.net/marketplace?retryWrites=true&w=majority&appName=Cluster0';
-mongoose.connect(mongo_URI)
-    .then(() => console.log('Connected to MongoDB'))
-    .catch(err => console.log('Error connecting to MongoDB', err));
+// exsample data
+const data = Array.from({ length: 100 }, (_, i) => ({ id: i + 1, name: `Item ${i + 1}` }));
+// [{ id: 1, name: 'Item 1' }, { id: 2, name: 'Item 2' }, ...]
 
-// Read JSON
-app.use(express.json());
-
-// Schema and Model for MongoDB
-const product_Schema = new mongoose.Schema({
-    display_name: String,
-    product_name: String
-})
-
-const Data = mongoose.model('Products',product_Schema);
-
-// Route for POST request
-app.post('/api/data', (req, res) => {
-    const newData = new Data(req.body);
-    console.log('Received request: ', req.body);
-
-    newData.save()
-        .then(() => res.status(201).send('Data saved to MongoDB'))
-        .catch(err => res.status(400).send(`Error: ${err}`));
-});
+app.get('/api/items', (req, res) => {
+    try {
+      const page = parseInt(req.query.page) || 1;
+      const limit = parseInt(req.query.limit) || 10;
+      const startIndex = (page - 1) * limit;
+      const endIndex = page * limit;
+      
+      // ดึงเอาข้อมูลเฉพาะหน้านั้นๆ
+      const results = data.slice(startIndex, endIndex); 
+  
+      // response กลับเป็น JSON
+      res.json({
+        totalItems: data.length,
+        totalPages: Math.ceil(data.length / limit),
+        currentPage: page,
+        items: results
+      });
+    } catch (error) {
+      res.status(500).json({ message: 'Internal Server Error', error: error.message });
+    }
+  });
 
 // Start Server
 app.listen(port, () => {
